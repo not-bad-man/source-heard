@@ -1,0 +1,128 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>sourceheart</title><style>* {
+         font-size: 0;
+         font-family: '楷体';
+         margin: 0;
+         padding: 0;
+         list-style: none;
+      }
+      body{
+         height: 100vh;
+         width: 100vw;
+      }
+      #canvas {
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         height: 100%;
+         width: 100%;
+         z-index: -1;
+      }
+
+      #app {
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         z-index: 999;
+
+      }</style><link href=./static/css/app.a1fc31794cca660381a02f8416a817b0.css rel=stylesheet></head><body><div id=app></div><canvas id=canvas></canvas><script>(function () {
+         var can = document.getElementById("canvas");
+         var ctx = can.getContext("2d");//设置绘图环境
+         var w = can.width = parseFloat(document.body.offsetWidth);//把窗口的宽度赋值给画布
+         var h = can.height = parseFloat(document.body.offsetHeight);//把窗口的高度赋值给画布
+         var count = 5;//雨滴的个数
+         var drops = [];//定义一个空数组来保存雨滴个数
+         //浏览器窗口改变的时候重新获取宽度
+         window.onresize = function () {
+            w = can.width = parseFloat(document.body.offsetWidth);
+            h = can.height = parseFloat(document.body.offsetHeight);
+         }
+         function Drop() {}//定义雨滴对象
+         //添加原型对象方法
+         Drop.prototype = {
+            init: function (index) {//初始化
+               this.index = Math.floor(Math.random()*26);
+               this.x = random(0, w);
+               this.y = 0;
+               this.r = 1;//初始半径
+               this.vy = random(2, 3);//竖直方向的加速度  //从4~5之间的随机数
+               this.vr = 1;//半径的加速度
+               this.a = 1;//初始透明度
+               this.va = 0.94;//透明度的变化系数
+               this.l = random(h * 0.6, h * 0.8);//雨滴下落的高度
+               this.img = new Image();
+               this.img.src = "./static/img/bgImg/"+this.index+".jpg";
+            },
+            draw: function () {//绘制
+               if (this.y > this.l) {
+                  this.drawRoundImg(this.x, this.y, this.r, this.a)
+               } else {
+                  ctx.fillStyle = color(this.a);//透明度
+                  ctx.fillRect(this.x, this.y, 2, 10);//绘制"已填充"的矩形。默认的填充颜色是黑色。
+               }
+               this.update();
+            },
+            //更新坐标
+            update: function () {
+               if (this.y < this.l) {
+                  this.y += this.vy;
+               } else {
+                  if (this.a > 0.03) {
+                     this.r += this.vr;
+                     if (this.r > 50) {
+                        this.a *= this.va;
+                     }
+                  } else {
+                     this.init();
+                  }
+               }
+            },
+            drawRoundImg(x, y, r, alpha) {
+               ctx.beginPath();
+               ctx.save();
+               ctx.ellipse(x, y, r * 1.5, r * 0.8, 0, 0, Math.PI * 2);
+               ctx.clip();
+               ctx.globalAlpha = alpha;
+               ctx.drawImage(this.img, x - r * 1.5, y - r * 0.8, 2 * r * 1.5, 2 * r * 0.8);
+               ctx.restore();
+            }
+         }
+         //不断的更新雨滴位置
+         function move() {
+            ctx.fillStyle = "rgba(0,0,0,.1)";
+            ctx.fillRect(0, 0, w, h);//这个在先绘制
+            for (var i = 0; i < drops.length; i++) {
+               drops[i].draw();
+            }
+            //调用经动画
+            requestAnimationFrame(move);
+         }
+         function setup() {
+            for (var i = 0; i < count; i++) {
+               (function (j) {
+                  setTimeout(function () {
+                     var drop = new Drop();
+                     drop.init(Math.random());
+                     drops.push(drop);
+                  }, j * 1000);
+               }(i))
+            }
+         }
+         setup();
+         move();
+         //封装一个产生随机数的方法
+         function random(min, max) {
+            return Math.random() * (max - min) + min;
+         }
+         //封装一个随机颜色
+         function color(a) {
+            //rgba
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")"
+         }
+      })()</script><script type=text/javascript src=./static/js/manifest.3ad1d5771e9b13dbdad2.js></script><script type=text/javascript src=./static/js/vendor.c5c3261347607ceb2b20.js></script><script type=text/javascript src=./static/js/app.0ed1b48cec4e6594e696.js></script></body></html>
